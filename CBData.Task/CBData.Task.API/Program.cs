@@ -24,12 +24,12 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 WebApplication app = builder.Build();
 
 //we need singleton instance of this class to write stuff in the console
+//OrdersSender should probably be somewhere else but it's Sunday evening already and the recruiter told me to have it done by the end of the weekend
 app.Services.GetRequiredService<OrdersSender>();
 
 //we need logger and main class instances here but the request handling is scoped so we need to keep that in mind
 ILogger<Program> logger;
 ApiRepository apiRepository;
-
 using (IServiceScope scope = app.Services.CreateScope())
 {
     logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -45,7 +45,7 @@ app.Use(async (context, next) =>
     //Exception handling middleware for unkwnown exceptions. Client exceptions are handled by Result class as communication via exceptions is slow
     catch (Exception ex)
     {
-        logger.LogError(ex, "Exception message: {ExceptionMessage}", ex.Message);
+        logger.LogError(ex, "Unknown exception. Exception message: {ExceptionMessage}", ex.Message);
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         await context.Response.WriteAsJsonAsync(new ResultDTO()
         {

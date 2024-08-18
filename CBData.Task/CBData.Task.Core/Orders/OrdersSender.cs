@@ -1,4 +1,5 @@
 ﻿using CBData.Task.Core.Main;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,11 @@ namespace CBData.Task.Core.Orders
     {
         private readonly System.Timers.Timer _sendOrdersTimer;
         private readonly IDataAccess _dataAccess;
+        private readonly ILogger<OrdersSender> _logger;
 
-        public OrdersSender(IDataAccess dataAccess)
+        public OrdersSender(IDataAccess dataAccess, ILogger<OrdersSender> logger)
         {
+            _logger = logger;
             _sendOrdersTimer = new(20000);
             _sendOrdersTimer.Elapsed += SendOrders;
             _sendOrdersTimer.AutoReset = true;
@@ -27,7 +30,14 @@ namespace CBData.Task.Core.Orders
 
         private void SendOrders(Object? source, ElapsedEventArgs e)
         {
-            Console.WriteLine(JsonSerializer.Serialize(_dataAccess.GetOrders()));
+            try
+            {
+                Console.WriteLine(JsonSerializer.Serialize(_dataAccess.GetOrders()));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception in SendOrders. Exception message: {ExceptionMessage}", ex.Message);
+            }
         }
 
         public void Dispose()
