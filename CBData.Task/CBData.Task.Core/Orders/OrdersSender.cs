@@ -9,7 +9,8 @@ using System.Timers;
 
 namespace CBData.Task.Core.Orders
 {
-    //the only resposibility is to access a static collection so this whole class might be static, we need only one instance
+    //this can be singleton as we need only one instance to access data and write them to console
+    //IDisposable just to be sure
     public sealed class OrdersSender : IDisposable
     {
         private readonly System.Timers.Timer _sendOrdersTimer;
